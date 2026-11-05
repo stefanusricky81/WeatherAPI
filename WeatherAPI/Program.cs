@@ -1,12 +1,27 @@
+using WeatherAPI;
+using WeatherAPI.App;
+using WeatherAPI.Infra;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Layers
+builder.Services.AddApp();
+builder.Services.AddInfra(builder.Configuration);
+
 
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+// Error handling
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
 var app = builder.Build();
+
+await app.Services.InitializeDatabaseAsync();
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -15,9 +30,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+// Front-end (wwwroot/index.html)
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
+public partial class Program { }

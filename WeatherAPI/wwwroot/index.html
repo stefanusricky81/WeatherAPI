@@ -1,0 +1,355 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Weather</title>
+    <style>
+        :root {
+            --bg: #f5f7fa;
+            --card: #ffffff;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --accent: #2563eb;
+            --ok: #15803d;
+            --err: #b91c1c;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        main {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 24px 16px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin: 0 0 16px;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            margin: 0 0 12px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+            .row label {
+                flex: 1 1 220px;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                font-size: 0.875rem;
+                color: var(--muted);
+            }
+
+        select, textarea, button {
+            font: inherit;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+
+            select:disabled {
+                background: #f3f4f6;
+            }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+        }
+
+        .metric {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+        }
+
+            .metric span {
+                display: block;
+                font-size: 0.75rem;
+                color: var(--muted);
+                text-transform: uppercase;
+                letter-spacing: 0.03em;
+                margin-bottom: 2px;
+            }
+
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        button {
+            margin-top: 8px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+            button:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+        .status {
+            margin: 8px 0 0;
+            font-size: 0.9rem;
+            min-height: 1.2em;
+        }
+
+            .status.ok {
+                color: var(--ok);
+            }
+
+            .status.err {
+                color: var(--err);
+            }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Weather</h1>
+
+        <section class="card">
+            <div class="row">
+                <label>
+                    Country
+                    <select id="country">
+                        <option value="">Loading…</option>
+                    </select>
+                </label>
+                <label>
+                    City
+                    <select id="city" disabled>
+                        <option value="">Select a country first</option>
+                    </select>
+                </label>
+            </div>
+            <p id="lookupStatus" class="status"></p>
+        </section>
+
+        <section id="weatherCard" class="card hidden">
+            <h2 id="weatherTitle"></h2>
+            <div id="metrics" class="grid"></div>
+        </section>
+
+        <section id="noteCard" class="card hidden">
+            <h2>Save a note</h2>
+            <form id="noteForm">
+                <textarea id="noteText" maxlength="500" placeholder="e.g. Heavy rain in the afternoon"></textarea>
+                <button id="saveButton" type="submit">Save note</button>
+                <p id="noteStatus" class="status"></p>
+            </form>
+        </section>
+    </main>
+    <script>
+        const countrySelect = document.getElementById('country');
+        const citySelect = document.getElementById('city');
+        const weatherCard = document.getElementById('weatherCard');
+        const weatherTitle = document.getElementById('weatherTitle');
+        const noteCard = document.getElementById('noteCard');
+        const noteForm = document.getElementById('noteForm');
+        const noteText = document.getElementById('noteText');
+        const lookupStatus = document.getElementById('lookupStatus');
+const noteStatus = document.getElementById('noteStatus');
+const metrics = document.getElementById('metrics');
+const saveButton = document.getElementById('saveButton');
+
+let cities = [];
+        let selectedCity = null;
+let weatherRequestId = 0;
+
+// Fetch JSON and turn ProblemDetails responses into readable error messages.
+async function getJson(url, options) {
+    const response = await fetch(url, options);
+    const isJson = (response.headers.get('content-type') || '').includes('json');
+    const body = isJson ? await response.json() : null;
+
+    if (!response.ok) {
+        const validation = body && body.errors ? Object.values(body.errors).flat().join(' ') : '';
+        throw new Error(validation || (body && body.title) || `Request failed (${response.status}).`);
+    }
+
+    return body;
+}
+
+function setStatus(element, message, type) {
+    element.textContent = message || '';
+    element.className = 'status' + (type ? ' ' + type : '');
+}
+
+function hideWeather() {
+    weatherCard.classList.add('hidden');
+    noteCard.classList.add('hidden');
+    setStatus(noteStatus, '');
+    selectedCity = null;
+}
+
+async function loadCountries() {
+    try {
+        const countries = await getJson('/api/countries');
+        countrySelect.innerHTML = '';
+        countrySelect.add(new Option('Select a country', ''));
+        countries.forEach(c => countrySelect.add(new Option(c.name, c.code)));
+    } catch (error) {
+        countrySelect.innerHTML = '';
+        countrySelect.add(new Option('Unavailable', ''));
+        setStatus(lookupStatus, error.message, 'err');
+    }
+}
+
+countrySelect.addEventListener('change', async () => {
+    hideWeather();
+    setStatus(lookupStatus, '');
+    citySelect.innerHTML = '';
+    citySelect.disabled = true;
+
+    const code = countrySelect.value;
+    if (!code) {
+        citySelect.add(new Option('Select a country first', ''));
+        return;
+    }
+
+    citySelect.add(new Option('Loading…', ''));
+
+    try {
+        cities = await getJson(`/api/countries/${encodeURIComponent(code)}/cities`);
+        citySelect.innerHTML = '';
+        citySelect.add(new Option('Select a city', ''));
+        cities.forEach(c => citySelect.add(new Option(c.name, c.id)));
+        citySelect.disabled = false;
+    } catch (error) {
+        citySelect.innerHTML = '';
+        citySelect.add(new Option('Unavailable', ''));
+        setStatus(lookupStatus, error.message, 'err');
+    }
+});
+
+citySelect.addEventListener('change', async () => {
+    hideWeather();
+
+    const city = cities.find(c => String(c.id) === citySelect.value);
+    if (!city) {
+        setStatus(lookupStatus, '');
+        return;
+    }
+
+    // Ignore responses from older requests if the user changes city quickly.
+    const requestId = ++weatherRequestId;
+    setStatus(lookupStatus, 'Loading weather…');
+
+    try {
+        const weather = await getJson(
+            `/api/weather/${encodeURIComponent(city.name)}?countryCode=${encodeURIComponent(city.countryCode)}`);
+
+        if (requestId !== weatherRequestId) return;
+
+        selectedCity = city;
+        renderWeather(weather);
+        setStatus(lookupStatus, '');
+    } catch (error) {
+        if (requestId !== weatherRequestId) return;
+        setStatus(lookupStatus, error.message, 'err');
+    }
+});
+
+function renderWeather(w) {
+    const wind = w.windDirection
+        ? `${w.windSpeedMph} mph ${w.windDirection} (${w.windDirectionDegrees}°)`
+        : `${w.windSpeedMph} mph`;
+
+    const visibility = w.visibilityMeters == null
+        ? 'n/a'
+        : `${(w.visibilityMeters / 1000).toFixed(1)} km`;
+
+    const observed = new Date(w.observedAtUtc).toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
+
+    const items = [
+        ['Location', `${w.city}, ${w.country}`],
+        ['Time (UTC)', observed],
+        ['Temperature', `${w.temperatureFahrenheit} °F / ${w.temperatureCelsius} °C`],
+        ['Sky', `${w.skyCondition} (${w.skyDescription})`],
+        ['Wind', wind],
+        ['Visibility', visibility],
+        ['Pressure', `${w.pressureHpa} hPa`],
+        ['Dew point', `${w.dewPointFahrenheit} °F / ${w.dewPointCelsius} °C`],
+        ['Relative humidity', `${w.relativeHumidityPercent}%`]
+    ];
+
+    metrics.innerHTML = '';
+    items.forEach(([label, value]) => {
+        const box = document.createElement('div');
+        box.className = 'metric';
+
+        const labelEl = document.createElement('span');
+        labelEl.textContent = label;
+
+        const valueEl = document.createElement('strong');
+        valueEl.textContent = value;
+
+        box.append(labelEl, valueEl);
+        metrics.append(box);
+    });
+
+    weatherTitle.textContent = `Current weather in ${w.city}`;
+    weatherCard.classList.remove('hidden');
+    noteCard.classList.remove('hidden');
+}
+
+noteForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (!selectedCity) return;
+
+    saveButton.disabled = true;
+    setStatus(noteStatus, 'Saving…');
+
+    try {
+        const result = await getJson('/api/weather/notes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cityId: selectedCity.id, text: noteText.value })
+        });
+
+        //setStatus(noteStatus, `Note saved (id ${result.id}).`, 'ok');
+        setStatus(noteStatus, `Note successfully added.`, 'ok');
+        noteText.value = '';
+    } catch (error) {
+        setStatus(noteStatus, error.message, 'err');
+    } finally {
+        saveButton.disabled = false;
+    }
+});
+
+loadCountries();
+    </script>
+</body>
+</html>

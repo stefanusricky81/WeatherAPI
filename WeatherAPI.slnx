@@ -2,5 +2,6 @@
   <Project Path="WeatherAPI.App/WeatherAPI.App.csproj" />
   <Project Path="WeatherAPI.Domain/WeatherAPI.Domain.csproj" />
   <Project Path="WeatherAPI.Infra/WeatherAPI.Infra.csproj" />
+  <Project Path="WeatherAPI.Tests/WeatherAPI.Tests.csproj" Id="055bc2fd-fc86-4953-8b11-3ab4e4b76a78" />
   <Project Path="WeatherAPI/WeatherAPI.csproj" />
 </Solution>
