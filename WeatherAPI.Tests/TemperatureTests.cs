@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using WeatherAPI.Domain.ValueObjects;
 
-namespace WeatherAPI.Tests.Domain
+namespace WeatherAPI.Tests
 {
     public class TemperatureTests
     {
