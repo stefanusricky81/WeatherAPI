@@ -8,9 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApp();
 builder.Services.AddInfra(builder.Configuration);
 
-
-// Add services to the container.
-
+// API
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
@@ -23,7 +21,6 @@ var app = builder.Build();
 await app.Services.InitializeDatabaseAsync();
 app.UseExceptionHandler();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -34,10 +31,8 @@ app.UseHttpsRedirection();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
-
-app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
+
 public partial class Program { }

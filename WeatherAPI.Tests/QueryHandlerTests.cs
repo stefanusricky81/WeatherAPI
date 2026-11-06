@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using WeatherAPI.App.Abstractions;
+﻿using WeatherAPI.App.Abstractions;
 using WeatherAPI.App.Features;
 using WeatherAPI.Domain.Entities;
 
@@ -27,7 +24,7 @@ namespace WeatherAPI.Tests
         }
 
         [Fact]
-        public async Task GetCitiesByCountryforNull()
+        public async Task GetCitiesByCountryReturnsNull()
         {
             var handler = new GetCitiesByCountryQueryHandler(new FakeCountryRepository(), new FakeCityRepository());
 
@@ -83,26 +80,17 @@ namespace WeatherAPI.Tests
 
             Assert.NotNull(result);
 
-            // Location & time
             Assert.Equal("Jakarta", result.City);
             Assert.Equal("ID", result.Country);
             Assert.Equal(observedAt, result.ObservedAtUtc);
-
-            // Temperature: 86 °F = 30 °C
             Assert.Equal(86, result.TemperatureFahrenheit);
             Assert.Equal(30, result.TemperatureCelsius);
-
-            // Dew point at 30 °C / 70 % RH ≈ 23.9 °C ≈ 75.1 °F (Magnus)
             Assert.Equal(23.9, result.DewPointCelsius);
             Assert.Equal(75.1, result.DewPointFahrenheit);
             Assert.Equal(70, result.RelativeHumidityPercent);
-
-            // Wind: rounded to 1 decimal, 225° = SW
             Assert.Equal(12.3, result.WindSpeedMph);
             Assert.Equal(225, result.WindDirectionDegrees);
             Assert.Equal("SW", result.WindDirection);
-
-            // Visibility, pressure, sky
             Assert.Equal(10000, result.VisibilityMeters);
             Assert.Equal(1010, result.PressureHpa);
             Assert.Equal("Clouds", result.SkyCondition);

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using WeatherAPI.App.Abstractions;
+﻿using WeatherAPI.App.Abstractions;
 using WeatherAPI.Domain.Entities;
 
 namespace WeatherAPI.Tests
@@ -22,7 +19,6 @@ namespace WeatherAPI.Tests
         }
     }
 
-    /// <summary>In-memory stand-in for ICityRepository.</summary>
     public class FakeCityRepository : ICityRepository
     {
         public List<City> Cities { get; } = [];

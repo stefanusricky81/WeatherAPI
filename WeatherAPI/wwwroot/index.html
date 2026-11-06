@@ -333,13 +333,12 @@ noteForm.addEventListener('submit', async event => {
     setStatus(noteStatus, 'Saving…');
 
     try {
-        const result = await getJson('/api/weather/notes', {
+        await getJson('/api/weather/notes', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ cityId: selectedCity.id, text: noteText.value })
         });
 
-        //setStatus(noteStatus, `Note saved (id ${result.id}).`, 'ok');
         setStatus(noteStatus, `Note successfully added.`, 'ok');
         noteText.value = '';
     } catch (error) {

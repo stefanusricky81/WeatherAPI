@@ -2,9 +2,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using WeatherAPI.App.Abstractions;
 
 namespace WeatherAPI.Infra
@@ -14,7 +11,6 @@ namespace WeatherAPI.Infra
         public static IServiceCollection AddInfra(this IServiceCollection services, IConfiguration configuration)
         {
             var connectionString = configuration.GetConnectionString("WeatherDb") ?? "Data Source=weather.db";
-            //var connectionString = configuration.GetConnectionString("WeatherDb");
             services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
 
             services.AddScoped<ICountryRepository, CountryRepository>();

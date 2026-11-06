@@ -1,9 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http.Json;
-using System.Text;
 using WeatherAPI.App.Abstractions;
 
 namespace WeatherAPI.Infra

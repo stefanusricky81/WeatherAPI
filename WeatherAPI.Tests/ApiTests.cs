@@ -39,12 +39,10 @@ namespace WeatherAPI.Tests
 
             builder.ConfigureServices(services =>
             {
-                // Replace SQLite with EF Core In-Memory.
                 services.RemoveAll<DbContextOptions<AppDbContext>>();
                 services.RemoveAll<IDbContextOptionsConfiguration<AppDbContext>>();
                 services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(_dbName));
 
-                // Replace the OpenWeatherMap client with a fake.
                 services.RemoveAll<IWeatherService>();
                 services.AddSingleton<IWeatherService>(Weather);
             });
@@ -78,7 +76,7 @@ namespace WeatherAPI.Tests
         }
 
         [Fact]
-        public async Task GetInvalidCitiesCountry()
+        public async Task GetCitiesUnknownCountryReturns404()
         {
             var response = await _client.GetAsync("/api/countries/XX/cities");
 
@@ -86,7 +84,7 @@ namespace WeatherAPI.Tests
         }
 
         [Fact]
-        public async Task GetCitiesInvalidCountry()
+        public async Task GetCitiesInvalidCodeReturns400()
         {
             var response = await _client.GetAsync("/api/countries/123/cities");
 

@@ -1,6 +1,26 @@
-@WeatherAPI_HostAddress = http://localhost:5247
+@WeatherAPI_HostAddress = https://localhost:7092
 
-GET {{WeatherAPI_HostAddress}}/weatherforecast/
+GET {{WeatherAPI_HostAddress}}/api/countries
 Accept: application/json
+
+###
+
+GET {{WeatherAPI_HostAddress}}/api/countries/au/cities
+Accept: application/json
+
+###
+
+GET {{WeatherAPI_HostAddress}}/api/weather/Jakarta?countryCode=ID
+Accept: application/json
+
+###
+
+POST {{WeatherAPI_HostAddress}}/api/weather/notes
+Content-Type: application/json
+
+{
+  "cityId": 1,
+  "text": "Sunny afternoon"
+}
 
 ###

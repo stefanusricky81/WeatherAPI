@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace WeatherAPI.Domain.ValueObjects
+﻿namespace WeatherAPI.Domain.ValueObjects
 {
     public static class Temperature
     {
         public const double AbsoluteZeroFahrenheit = -459.67;
         private const double Tolerance = 1e-9;
 
-        // Magnus formula coefficients (valid roughly -45 °C to 60 °C)
         private const double MagnusB = 17.62;
         private const double MagnusC = 243.12;
 

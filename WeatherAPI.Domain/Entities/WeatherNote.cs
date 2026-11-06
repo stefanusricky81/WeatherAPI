@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using WeatherAPI.Domain.ValueObjects;
-
-namespace WeatherAPI.Domain.Entities
+﻿namespace WeatherAPI.Domain.Entities
 {
     public class WeatherNote
     {

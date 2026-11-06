@@ -1,8 +1,5 @@
 ﻿using FluentValidation;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using WeatherAPI.App.Abstractions;
 
 namespace WeatherAPI.App.Features
@@ -23,7 +20,7 @@ namespace WeatherAPI.App.Features
     {
         public GetCitiesByCountryQueryValidator()
         {
-            RuleFor(x => x.CountryCode).NotEmpty().Matches("^[A-Za-z]{2}$").WithMessage("Country code must be 2 letter.");
+            RuleFor(x => x.CountryCode).NotEmpty().Matches("^[A-Za-z]{2}$").WithMessage("Country code must be a 2-letter ISO code.");
         }
     }
 

@@ -1,7 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using WeatherAPI.App.Abstractions;
 using WeatherAPI.App.Features;
 using WeatherAPI.Infra;
@@ -27,17 +24,16 @@ namespace WeatherAPI.Tests
             Assert.NotNull(id);
             Assert.True(id > 0);
 
-            // Read back through a NEW context to prove the row was persisted, not just tracked.
             using var verifyDb = CreateDb(dbName);
             var note = await verifyDb.WeatherNotes.AsNoTracking().SingleAsync();
 
             Assert.Equal(id, note.Id);
             Assert.Equal(1, note.CityId);
-            Assert.Equal("Sunny morning", note.Text);               // trimmed by the entity
-            Assert.Equal(86, note.Fahrenheit);                      // snapshot from the provider
+            Assert.Equal("Sunny morning", note.Text);             
+            Assert.Equal(86, note.Fahrenheit);                      
             Assert.Equal("Clear", note.SkyCondition);
             Assert.Equal(ObservedAt, note.ObservedAtUtc);
-            Assert.Equal(Now.UtcDateTime, note.CreatedAtUtc);       // from the injected clock
+            Assert.Equal(Now.UtcDateTime, note.CreatedAtUtc);       
         }
 
         [Fact]
@@ -80,7 +76,7 @@ namespace WeatherAPI.Tests
                 .Options;
 
             var db = new AppDbContext(options);
-            db.Database.EnsureCreated();   // applies seed data (countries & cities)
+            db.Database.EnsureCreated();   
             return db;
         }
 
