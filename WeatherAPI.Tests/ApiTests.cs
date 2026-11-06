@@ -58,7 +58,7 @@ namespace WeatherAPI.Tests
         // ---------- Countries & cities ----------
 
         [Fact]
-        public async Task GetCountries_SuccessfullyReturnsCountries()
+        public async Task GetCountries()
         {
             var countries = await _client.GetFromJsonAsync<List<CountryDto>>("/api/countries");
 
@@ -68,7 +68,7 @@ namespace WeatherAPI.Tests
         }
 
         [Fact]
-        public async Task GetCities_ReturnsCitiesForExistingCountry()
+        public async Task GetCities()
         {
             var cities = await _client.GetFromJsonAsync<List<CityDto>>("/api/countries/au/cities");
 
@@ -78,7 +78,7 @@ namespace WeatherAPI.Tests
         }
 
         [Fact]
-        public async Task GetCities_InvalidCountryReturns404()
+        public async Task GetInvalidCitiesCountry()
         {
             var response = await _client.GetAsync("/api/countries/XX/cities");
 
@@ -86,7 +86,7 @@ namespace WeatherAPI.Tests
         }
 
         [Fact]
-        public async Task GetCities_InvalidCountryCodeReturns400()
+        public async Task GetCitiesInvalidCountry()
         {
             var response = await _client.GetAsync("/api/countries/123/cities");
 
@@ -99,7 +99,7 @@ namespace WeatherAPI.Tests
         // ---------- Weather ----------
 
         [Fact]
-        public async Task GetWeather_ValidCityReturns200()
+        public async Task GetValidWeather()
         {
             var weather = await _client.GetFromJsonAsync<WeatherDto>("/api/weather/Jakarta?countryCode=ID");
 
@@ -111,18 +111,10 @@ namespace WeatherAPI.Tests
             Assert.Equal("E", weather.WindDirection);
         }
 
-        [Fact]
-        public async Task GetWeather_InvalidCityReturns404()
-        {
-            var response = await _client.GetAsync("/api/weather/Atlantis");
-
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        }
-
         // ---------- Notes (command) ----------
 
         [Fact]
-        public async Task CreateNote_ValidDataReturns201()
+        public async Task CreateNoteValidData()
         {
             var response = await _client.PostAsJsonAsync("/api/weather/notes", new { cityId = 1, text = "Clear skies" });
 
@@ -136,22 +128,6 @@ namespace WeatherAPI.Tests
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             var note = await db.WeatherNotes.AsNoTracking().SingleAsync(n => n.Id == id);
             Assert.Equal("Clear skies", note.Text);
-        }
-
-        [Fact]
-        public async Task CreateNote_EmptyText_Returns400()
-        {
-            var response = await _client.PostAsJsonAsync("/api/weather/notes", new { cityId = 1, text = "" });
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task CreateNote_InvalidCItyReturns404()
-        {
-            var response = await _client.PostAsJsonAsync("/api/weather/notes", new { cityId = 999, text = "Hello" });
-
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
     }
 }

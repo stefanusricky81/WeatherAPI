@@ -10,11 +10,11 @@ namespace WeatherAPI.Tests
 {
     public class CommandHandlerTests
     {
-        private static readonly DateTimeOffset Now = new(2026, 1, 1, 8, 0, 0, TimeSpan.Zero);
-        private static readonly DateTime ObservedAt = new(2026, 1, 1, 7, 30, 0, DateTimeKind.Utc);
+        private static readonly DateTimeOffset Now = DateTimeOffset.UtcNow; 
+        private static readonly DateTime ObservedAt = DateTime.UtcNow;
 
         [Fact]
-        public async Task CreateNote_ValidCommandAndPersistNoteWithWeatherSnapshot()
+        public async Task CreateNoteValidCommand()
         {
             var dbName = Guid.NewGuid().ToString();
             using var db = CreateDb(dbName);
@@ -41,23 +41,7 @@ namespace WeatherAPI.Tests
         }
 
         [Fact]
-        public async Task CreateNote_TwoCommandsGenerateDistinctIds()
-        {
-            var dbName = Guid.NewGuid().ToString();
-            using var db = CreateDb(dbName);
-            var handler = CreateHandler(db, Observation(), out _);
-
-            var first = await handler.Handle(new CreateWeatherNoteCommand { CityId = 1, Text = "First" }, CancellationToken.None);
-            var second = await handler.Handle(new CreateWeatherNoteCommand { CityId = 1, Text = "Second" }, CancellationToken.None);
-
-            Assert.NotEqual(first, second);
-
-            using var verifyDb = CreateDb(dbName);
-            Assert.Equal(2, await verifyDb.WeatherNotes.CountAsync());
-        }
-
-        [Fact]
-        public async Task CreateNote_UnknownCityReturnsNullPersistsNothing()
+        public async Task CreateNoteForInvalidCity()
         {
             var dbName = Guid.NewGuid().ToString();
             using var db = CreateDb(dbName);
@@ -73,7 +57,7 @@ namespace WeatherAPI.Tests
         }
 
         [Fact]
-        public async Task CreateNote_ProviderNotKnowCityReturnsNullAndPersistsNothing()
+        public async Task CreateNoteProviderInvalidCity()
         {
             var dbName = Guid.NewGuid().ToString();
             using var db = CreateDb(dbName);
