@@ -18,34 +18,23 @@ namespace WeatherAPI.Infra
             modelBuilder.Entity<Country>(e =>
             {
                 e.HasKey(c => c.Code);
-                e.Property(c => c.Code).HasMaxLength(2);
-                e.Property(c => c.Name).HasMaxLength(100).IsRequired();
                 e.HasData(SeedCountries);
             });
 
             modelBuilder.Entity<City>(e =>
             {
-                e.HasKey(c => c.Id);
-                e.Property(c => c.Id).ValueGeneratedNever();
-                e.Property(c => c.Name).HasMaxLength(100).IsRequired();
-                e.Property(c => c.CountryCode).HasMaxLength(2).IsRequired();
                 e.HasOne<Country>().WithMany().HasForeignKey(c => c.CountryCode);
-                e.HasIndex(c => new { c.CountryCode, c.Name }).IsUnique();
                 e.HasData(SeedCities);
             });
 
             modelBuilder.Entity<WeatherNote>(e =>
             {
-                e.HasKey(n => n.Id);
-                e.Property(n => n.Text).HasMaxLength(WeatherNote.MaxTextLength).IsRequired();
-                e.Property(n => n.SkyCondition).HasMaxLength(50).IsRequired();
                 e.HasOne<City>().WithMany().HasForeignKey(n => n.CityId);
             });
         }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
-            // SQLite does not store DateTimeKind; force every DateTime to be read back as UTC.
             configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
         }
 
