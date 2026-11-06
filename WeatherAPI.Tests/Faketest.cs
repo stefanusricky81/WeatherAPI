@@ -6,7 +6,6 @@ using WeatherAPI.Domain.Entities;
 
 namespace WeatherAPI.Tests
 {
-    /// <summary>In-memory stand-in for ICountryRepository.</summary>
     public class FakeCountryRepository : ICountryRepository
     {
         public List<Country> Countries { get; } = [];
@@ -47,7 +46,6 @@ namespace WeatherAPI.Tests
         }
     }
 
-    /// <summary>Returns a preset observation and records how it was called. No network access.</summary>
     public class FakeWeatherService : IWeatherService
     {
         public WeatherObservation? Result { get; set; }
@@ -64,7 +62,6 @@ namespace WeatherAPI.Tests
         }
     }
 
-    /// <summary>A clock that always returns the same moment, so timestamps are predictable in tests.</summary>
     public class FixedTimeProvider(DateTimeOffset now) : TimeProvider
     {
         public override DateTimeOffset GetUtcNow() => now;

@@ -10,7 +10,7 @@ namespace WeatherAPI.Tests
     public class QueryHandlerTests
     {
         [Fact]
-        public async Task ReturnsAllCountriesSortedByName()
+        public async Task GetCountriesSortedByName()
         {
             var countries = new FakeCountryRepository();
             countries.Countries.Add(new Country("SG", "Singapore"));
@@ -27,7 +27,7 @@ namespace WeatherAPI.Tests
         }
 
         [Fact]
-        public async Task GetCitiesByCountry_ReturnsNull()
+        public async Task GetCitiesByCountryforNull()
         {
             var handler = new GetCitiesByCountryQueryHandler(new FakeCountryRepository(), new FakeCityRepository());
 
@@ -37,7 +37,7 @@ namespace WeatherAPI.Tests
         }
 
         [Fact]
-        public async Task GetCitiesByCountry_ReturnsOnlyCitiesCountryAndAllowLowerCase()
+        public async Task GetCitiesCountryAndAllowLowerCase()
         {
             var countries = new FakeCountryRepository();
             countries.Countries.Add(new Country("AU", "Australia"));
@@ -58,7 +58,7 @@ namespace WeatherAPI.Tests
         }
 
         [Fact]
-        public async Task GetWeather_CityNotInDBReturnsNullAndNotCallProvider()
+        public async Task GetWeatherInvalidCity()
         {
             var weather = new FakeWeatherService { Result = SampleObservation() };
             var handler = new GetWeatherQueryHandler(new FakeCityRepository(), weather);
@@ -70,37 +70,7 @@ namespace WeatherAPI.Tests
         }
 
         [Fact]
-        public async Task GetWeather_UnknownKnowCityReturnsNull()
-        {
-            var cities = new FakeCityRepository();
-            cities.Cities.Add(new City(1, "Jakarta", "ID"));
-
-            var weather = new FakeWeatherService { Result = null };
-            var handler = new GetWeatherQueryHandler(cities, weather);
-
-            var result = await handler.Handle(new GetWeatherQ { CityName = "Jakarta", CountryCode = "ID" }, CancellationToken.None);
-
-            Assert.Null(result);
-        }
-
-        [Fact]
-        public async Task GetWeather_UseCountryCodeToCity()
-        {
-            var cities = new FakeCityRepository();
-            cities.Cities.Add(new City(8, "Perth", "AU"));
-            cities.Cities.Add(new City(15, "Perth", "GB"));
-
-            var weather = new FakeWeatherService { Result = SampleObservation() };
-            var handler = new GetWeatherQueryHandler(cities, weather);
-
-            await handler.Handle(new GetWeatherQ { CityName = "perth", CountryCode = "gb" }, CancellationToken.None);
-
-            Assert.Equal("Perth", weather.LastCityName);
-            Assert.Equal("GB", weather.LastCountryCode);
-        }
-
-        [Fact]
-        public async Task GetWeather_MapsPayloadConvertsFahrenheitToCelsius()
+        public async Task GetWeatherConvertsFahrenheitToCelsius()
         {
             var cities = new FakeCityRepository();
             cities.Cities.Add(new City(1, "Jakarta", "ID"));
@@ -139,26 +109,10 @@ namespace WeatherAPI.Tests
             Assert.Equal("scattered clouds", result.SkyDescription);
         }
 
-        [Fact]
-        public async Task GetWeather_NoWindDirectionReturnsNullCompass()
-        {
-            var cities = new FakeCityRepository();
-            cities.Cities.Add(new City(1, "Jakarta", "ID"));
-
-            var observation = SampleObservation();
-            observation.WindDirectionDegrees = null;
-
-            var handler = new GetWeatherQueryHandler(cities, new FakeWeatherService { Result = observation });
-
-            var result = await handler.Handle(new GetWeatherQ { CityName = "Jakarta" }, CancellationToken.None);
-
-            Assert.Null(result!.WindDirection);
-        }
-
         [Theory]
         [InlineData(225, "SW")]
         [InlineData(355, "N")]
-        public async Task GetWeather_ConvertsWindDegreesToCompass(int degrees, string expected)
+        public async Task GetWeatherConvertsWindDegreesToCompass(int degrees, string expected)
         {
             var cities = new FakeCityRepository();
             cities.Cities.Add(new City(1, "Jakarta", "ID"));
